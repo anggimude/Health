@@ -1,11 +1,11 @@
 #### Preamble ####
-# Purpose: Cleans the raw plane data recorded by two observers..... [...UPDATE THIS...]
+# Purpose: Cleans the raw plane data recorded by two observers.....
 # Author: Hyuk Jang
 # Date: 26 Mar 2024
 # Contact: hyuk.jang@mail.utoronto.ca
 # License: MIT
-# Pre-requisites: [...UPDATE THIS...]
-# Any other information needed? [...UPDATE THIS...]
+# Pre-requisites: 
+# Any other information needed?:
 
 #### Workspace setup ####
 library(tidyverse)

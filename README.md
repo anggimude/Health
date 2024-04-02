@@ -1,8 +1,8 @@
-# Global suicide Rates and its correlation to country income, region, age, and gender
+# Global suicide Rates and its correlation to country income, region, age, and gender in 2019
 
 ## Overview
 
-This repo provides a correlation between global suicide rates and its correlation to country income, region, age, and gender. 
+This repo provides a correlation between global suicide rates and its correlation to country income, region, age, and gender in 2019. 
 
 
 ## File Structure

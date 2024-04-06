@@ -75,3 +75,50 @@ simulated_data <- do.call(rbind, simulated_data)
 # View the first few rows of the simulated data
 head(simulated_data)
 This script generates synthetic data for suicide rates by gender and age group for each country. It loops through all combinations of countries, genders, and age groups, simulates suicide rates, and stores the data in a list of data frames. Finally, it combines these data frames into a single data frame using do.call(rbind, simulated_data). Adjust the number of countries, age groups, and genders as needed.
+
+User
+# Assuming you want to keep all columns in cleaned_sr_data and only select the same columns as cleaned_sr_data from cleaned_ag_data
+i want to keep the columns that dont match 
+ChatGPT
+If you want to keep all columns from both datasets (cleaned_sr_data and cleaned_ag_data), and you only want to match rows based on the number of columns, you can use rbind.fill() from the dplyr package. This function will combine the datasets, filling missing values with NA where necessary.
+
+Here's how you can do it:
+
+R
+Copy code
+library(dplyr)
+
+# Combine the datasets, keeping all columns
+merged_table <- dplyr::bind_rows(cleaned_sr_data, cleaned_ag_data)
+This will merge both datasets together, keeping all columns from both datasets, and aligning the rows based on the number of columns. If a column is missing in one dataset, it will be filled with NA in the merged dataset.
+
+User
+i have 4 categories and if a value of a column is equal to for example to one of the lower_income countries, i want to make the value of the column income_group be lower_income how would i do so
+ChatGPT
+You can achieve this using dplyr's case_when() function to create a new column income_group based on the values in the existing column. Here's how you can do it:
+
+r
+Copy code
+library(dplyr)
+
+# Assuming 'your_data' is your dataset and 'Country' is the column with country names
+
+# Add a new column 'income_group' based on country names
+your_data <- your_data %>%
+  mutate(
+    income_group = case_when(
+      Country %in% lower_income ~ "lower_income",
+      Country %in% lower_middle ~ "lower_middle",
+      Country %in% upper_middle ~ "upper_middle",
+      Country %in% high_income ~ "high_income",
+      TRUE ~ NA_character_  # If none of the conditions are met, set to NA
+    )
+  )
+
+# View the modified dataset
+print(your_data)
+In this code:
+
+We use mutate() to create a new column income_group.
+We use case_when() to assign the appropriate income group based on the values in the Country column.
+If the country name matches any country in the lower_income, lower_middle, upper_middle, or high_income vectors, it will be assigned the corresponding income group. Otherwise, it will be set to NA.

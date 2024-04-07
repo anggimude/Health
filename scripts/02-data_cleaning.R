@@ -193,10 +193,233 @@ cleaned_merged_table <- merged_table|>
       Country %in% South_America ~ "South America",
       Country %in% Asia ~ "Asia",
       TRUE ~ NA_character_
-  )
+  ) 
+)|>
+  mutate(across(starts_with("Age"), as.numeric))
+
+both_table <- cleaned_merged_table[cleaned_merged_table$Sex == 'Both sexes', ]
+both_table <- both_table|>
+  select(c(-Sex))
+
+average_table <- data.frame(
+  "Region/Income Group" = "Global",
+  "Age-standardized suicide rates (per 100 000 population)" = mean(both_table$`Age-standardized suicide rates (per 100 000 population)`),
+  "Age_85+" = mean(both_table$`Age_85+`),
+  "Age_75-84" = mean(both_table$`Age_75-84`),
+  "Age_65-74" = mean(both_table$`Age_65-74`),
+  "Age_55-64" = mean(both_table$`Age_55-64`),
+  "Age_45-54" = mean(both_table$`Age_45-54`),
+  "Age_35-44" = mean(both_table$`Age_35-44`),
+  "Age_25-34" = mean(both_table$`Age_25-34`),
+  "Age_15-24" = mean(both_table$`Age_15-24`)
 )
 
+new_column_names <- c(
+  "Region/Income Group",
+  "Age-standardized suicide rates (per 100 000 population)",
+  "Age_85+",
+  "Age_75-84",
+  "Age_65-74",
+  "Age_55-64",
+  "Age_45-54",
+  "Age_35-44",
+  "Age_25-34",
+  "Age_15-24"
+)
+
+# Set the new column names for both_table
+names(average_table) <- new_column_names
+
+
+# analyzed data of lower income countries
+lower_income_data <- both_table |>
+  filter(Income_Group == "lower_income")|>
+  select(c(-Country)) |>
+  summarise(
+    "Region/Income Group" = "Lower Income",
+    "Age-standardized suicide rates (per 100 000 population)" = mean(`Age-standardized suicide rates (per 100 000 population)`),
+    "Age_85+" = mean(`Age_85+`),
+    "Age_75-84" = mean(`Age_75-84`),
+    "Age_65-74" = mean(`Age_65-74`),
+    "Age_55-64" = mean(`Age_55-64`),
+    "Age_45-54" = mean(`Age_45-54`),
+    "Age_35-44" = mean(`Age_35-44`),
+    "Age_25-34" = mean(`Age_25-34`),
+    "Age_15-24" = mean(`Age_15-24`)
+  )
+
+# analyzed data of lower middle income countries
+lower_middle_data <- both_table |>
+  filter(Income_Group == "lower_middle")|>
+  select(c(-Country)) |>
+  summarise(
+    "Region/Income Group" = "Lower Middle",
+    "Age-standardized suicide rates (per 100 000 population)" = mean(`Age-standardized suicide rates (per 100 000 population)`),
+    "Age_85+" = mean(`Age_85+`),
+    "Age_75-84" = mean(`Age_75-84`),
+    "Age_65-74" = mean(`Age_65-74`),
+    "Age_55-64" = mean(`Age_55-64`),
+    "Age_45-54" = mean(`Age_45-54`),
+    "Age_35-44" = mean(`Age_35-44`),
+    "Age_25-34" = mean(`Age_25-34`),
+    "Age_15-24" = mean(`Age_15-24`)
+  )
+
+# analyzed data of upper middle income countries
+upper_middle_data <- both_table |>
+  filter(Income_Group == "upper_middle")|>
+  select(c(-Country)) |>
+  summarise(
+    "Region/Income Group" = "Upper Middle",
+    "Age-standardized suicide rates (per 100 000 population)" = mean(`Age-standardized suicide rates (per 100 000 population)`),
+    "Age_85+" = mean(`Age_85+`),
+    "Age_75-84" = mean(`Age_75-84`),
+    "Age_65-74" = mean(`Age_65-74`),
+    "Age_55-64" = mean(`Age_55-64`),
+    "Age_45-54" = mean(`Age_45-54`),
+    "Age_35-44" = mean(`Age_35-44`),
+    "Age_25-34" = mean(`Age_25-34`),
+    "Age_15-24" = mean(`Age_15-24`)
+  )
+
+# analyzed data of high income countries
+high_income_data <- both_table |>
+  filter(Income_Group == "high_income")|>
+  select(c(-Country)) |>
+  summarise(
+    "Region/Income Group" = "High Income",
+    "Age-standardized suicide rates (per 100 000 population)" = mean(`Age-standardized suicide rates (per 100 000 population)`),
+    "Age_85+" = mean(`Age_85+`),
+    "Age_75-84" = mean(`Age_75-84`),
+    "Age_65-74" = mean(`Age_65-74`),
+    "Age_55-64" = mean(`Age_55-64`),
+    "Age_45-54" = mean(`Age_45-54`),
+    "Age_35-44" = mean(`Age_35-44`),
+    "Age_25-34" = mean(`Age_25-34`),
+    "Age_15-24" = mean(`Age_15-24`)
+  )
+
+# analyzed data of Asia 
+asia_data <- both_table |>
+  filter(Region == "Asia")|>
+  select(c(-Country)) |>
+  summarise(
+    "Region/Income Group" = "Asia",
+    "Age-standardized suicide rates (per 100 000 population)" = mean(`Age-standardized suicide rates (per 100 000 population)`),
+    "Age_85+" = mean(`Age_85+`),
+    "Age_75-84" = mean(`Age_75-84`),
+    "Age_65-74" = mean(`Age_65-74`),
+    "Age_55-64" = mean(`Age_55-64`),
+    "Age_45-54" = mean(`Age_45-54`),
+    "Age_35-44" = mean(`Age_35-44`),
+    "Age_25-34" = mean(`Age_25-34`),
+    "Age_15-24" = mean(`Age_15-24`)
+  )
+
+# analyzed data of Africa
+africa_data <- both_table |>
+  filter(Region == "Africa")|>
+  select(c(-Country)) |>
+  summarise(
+    "Region/Income Group" = "Africa",
+    "Age-standardized suicide rates (per 100 000 population)" = mean(`Age-standardized suicide rates (per 100 000 population)`),
+    "Age_85+" = mean(`Age_85+`),
+    "Age_75-84" = mean(`Age_75-84`),
+    "Age_65-74" = mean(`Age_65-74`),
+    "Age_55-64" = mean(`Age_55-64`),
+    "Age_45-54" = mean(`Age_45-54`),
+    "Age_35-44" = mean(`Age_35-44`),
+    "Age_25-34" = mean(`Age_25-34`),
+    "Age_15-24" = mean(`Age_15-24`)
+  )
+
+# analyzed data of Europe
+europe_data <- both_table |>
+  filter(Region == "Europe")|>
+  select(c(-Country)) |>
+  summarise(
+    "Region/Income Group" = "Europe",
+    "Age-standardized suicide rates (per 100 000 population)" = mean(`Age-standardized suicide rates (per 100 000 population)`),
+    "Age_85+" = mean(`Age_85+`),
+    "Age_75-84" = mean(`Age_75-84`),
+    "Age_65-74" = mean(`Age_65-74`),
+    "Age_55-64" = mean(`Age_55-64`),
+    "Age_45-54" = mean(`Age_45-54`),
+    "Age_35-44" = mean(`Age_35-44`),
+    "Age_25-34" = mean(`Age_25-34`),
+    "Age_15-24" = mean(`Age_15-24`)
+  )
+
+# analyzed data of North America
+northamerica_data <- both_table |>
+  filter(Region == "North America")|>
+  select(c(-Country)) |>
+  summarise(
+    "Region/Income Group" = "North America",
+    "Age-standardized suicide rates (per 100 000 population)" = mean(`Age-standardized suicide rates (per 100 000 population)`),
+    "Age_85+" = mean(`Age_85+`),
+    "Age_75-84" = mean(`Age_75-84`),
+    "Age_65-74" = mean(`Age_65-74`),
+    "Age_55-64" = mean(`Age_55-64`),
+    "Age_45-54" = mean(`Age_45-54`),
+    "Age_35-44" = mean(`Age_35-44`),
+    "Age_25-34" = mean(`Age_25-34`),
+    "Age_15-24" = mean(`Age_15-24`)
+  )
+
+# analyzed data of South America
+southamerica_data <- both_table |>
+  filter(Region == "South America")|>
+  select(c(-Country)) |>
+  summarise(
+    "Region/Income Group" = "South America",
+    "Age-standardized suicide rates (per 100 000 population)" = mean(`Age-standardized suicide rates (per 100 000 population)`),
+    "Age_85+" = mean(`Age_85+`),
+    "Age_75-84" = mean(`Age_75-84`),
+    "Age_65-74" = mean(`Age_65-74`),
+    "Age_55-64" = mean(`Age_55-64`),
+    "Age_45-54" = mean(`Age_45-54`),
+    "Age_35-44" = mean(`Age_35-44`),
+    "Age_25-34" = mean(`Age_25-34`),
+    "Age_15-24" = mean(`Age_15-24`)
+  )
+
+# analyzed data of Oceania
+oceania_data <- both_table |>
+  filter(Region == "Oceania")|>
+  select(c(-Country)) |>
+  summarise(
+    "Region/Income Group" = "Oceania",
+    "Age-standardized suicide rates (per 100 000 population)" = mean(`Age-standardized suicide rates (per 100 000 population)`),
+    "Age_85+" = mean(`Age_85+`),
+    "Age_75-84" = mean(`Age_75-84`),
+    "Age_65-74" = mean(`Age_65-74`),
+    "Age_55-64" = mean(`Age_55-64`),
+    "Age_45-54" = mean(`Age_45-54`),
+    "Age_35-44" = mean(`Age_35-44`),
+    "Age_25-34" = mean(`Age_25-34`),
+    "Age_15-24" = mean(`Age_15-24`)
+  )
+
+# create a summary statistic by binding all the subtables into one
+sum_sta <- rbind(
+  average_table,
+  lower_income_data,
+  lower_middle_data,
+  upper_middle_data,
+  high_income_data,
+  asia_data,
+  europe_data,
+  northamerica_data,
+  southamerica_data,
+  africa_data,
+  oceania_data
+)
 
 # Save table as parquet, csv file
 write_csv(cleaned_merged_table, "data/analysis_data/cleaned_merged_table.csv")
 write_parquet(cleaned_merged_table, "data/analysis_data/cleaned_merged_table.parquet")
+write_csv(both_table, "data/analysis_data/both_table.csv")
+write_parquet(both_table, "data/analysis_data/both_table.parquet")
+write_csv(sum_sta, "data/analysis_data/sum_sta.csv")
+write_parquet(sum_sta, "data/analysis_data/sum_sta.parquet")

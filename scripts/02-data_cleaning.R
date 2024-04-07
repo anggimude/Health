@@ -197,46 +197,69 @@ cleaned_merged_table <- merged_table|>
 )|>
   mutate(across(starts_with("Age"), as.numeric))
 
+# Create table of both sex data
 both_table <- cleaned_merged_table[cleaned_merged_table$Sex == 'Both sexes', ]
 both_table <- both_table|>
   select(c(-Sex))
+# Create table of male data
+male_table <- cleaned_merged_table[cleaned_merged_table$Sex == 'Male', ]
+male_table <- male_table|>
+  select(c(-Sex))
+# Create table of female data
+female_table <- cleaned_merged_table[cleaned_merged_table$Sex == 'Female', ]
+female_table <- female_table|>
+  select(c(-Sex))
 
-average_table <- data.frame(
-  "Region/Income Group" = "Global",
-  "Age-standardized suicide rates (per 100 000 population)" = mean(both_table$`Age-standardized suicide rates (per 100 000 population)`),
-  "Age_85+" = mean(both_table$`Age_85+`),
-  "Age_75-84" = mean(both_table$`Age_75-84`),
-  "Age_65-74" = mean(both_table$`Age_65-74`),
-  "Age_55-64" = mean(both_table$`Age_55-64`),
-  "Age_45-54" = mean(both_table$`Age_45-54`),
-  "Age_35-44" = mean(both_table$`Age_35-44`),
-  "Age_25-34" = mean(both_table$`Age_25-34`),
-  "Age_15-24" = mean(both_table$`Age_15-24`)
+average_data <- both_table |>
+  summarise(
+    "Region/Income/Sex" = "Global",
+    "Age-standardized suicide rates (per 100 000 population)" = mean(both_table$`Age-standardized suicide rates (per 100 000 population)`),
+    "Age_85+" = mean(both_table$`Age_85+`),
+    "Age_75-84" = mean(both_table$`Age_75-84`),
+    "Age_65-74" = mean(both_table$`Age_65-74`),
+    "Age_55-64" = mean(both_table$`Age_55-64`),
+    "Age_45-54" = mean(both_table$`Age_45-54`),
+    "Age_35-44" = mean(both_table$`Age_35-44`),
+    "Age_25-34" = mean(both_table$`Age_25-34`),
+    "Age_15-24" = mean(both_table$`Age_15-24`)
 )
 
-new_column_names <- c(
-  "Region/Income Group",
-  "Age-standardized suicide rates (per 100 000 population)",
-  "Age_85+",
-  "Age_75-84",
-  "Age_65-74",
-  "Age_55-64",
-  "Age_45-54",
-  "Age_35-44",
-  "Age_25-34",
-  "Age_15-24"
-)
+# analyzed data of Female
+female_data <- female_table |>
+  summarise(
+    "Region/Income/Sex" = "Female",
+    "Age-standardized suicide rates (per 100 000 population)" = mean(`Age-standardized suicide rates (per 100 000 population)`),
+    "Age_85+" = mean(`Age_85+`),
+    "Age_75-84" = mean(`Age_75-84`),
+    "Age_65-74" = mean(`Age_65-74`),
+    "Age_55-64" = mean(`Age_55-64`),
+    "Age_45-54" = mean(`Age_45-54`),
+    "Age_35-44" = mean(`Age_35-44`),
+    "Age_25-34" = mean(`Age_25-34`),
+    "Age_15-24" = mean(`Age_15-24`)
+  )
 
-# Set the new column names for both_table
-names(average_table) <- new_column_names
-
+# analyzed data of Male
+male_data <- male_table |>
+  summarise(
+    "Region/Income/Sex" = "Male",
+    "Age-standardized suicide rates (per 100 000 population)" = mean(`Age-standardized suicide rates (per 100 000 population)`),
+    "Age_85+" = mean(`Age_85+`),
+    "Age_75-84" = mean(`Age_75-84`),
+    "Age_65-74" = mean(`Age_65-74`),
+    "Age_55-64" = mean(`Age_55-64`),
+    "Age_45-54" = mean(`Age_45-54`),
+    "Age_35-44" = mean(`Age_35-44`),
+    "Age_25-34" = mean(`Age_25-34`),
+    "Age_15-24" = mean(`Age_15-24`)
+  )
 
 # analyzed data of lower income countries
 lower_income_data <- both_table |>
   filter(Income_Group == "lower_income")|>
   select(c(-Country)) |>
   summarise(
-    "Region/Income Group" = "Lower Income",
+    "Region/Income/Sex" = "Lower Income",
     "Age-standardized suicide rates (per 100 000 population)" = mean(`Age-standardized suicide rates (per 100 000 population)`),
     "Age_85+" = mean(`Age_85+`),
     "Age_75-84" = mean(`Age_75-84`),
@@ -253,7 +276,7 @@ lower_middle_data <- both_table |>
   filter(Income_Group == "lower_middle")|>
   select(c(-Country)) |>
   summarise(
-    "Region/Income Group" = "Lower Middle",
+    "Region/Income/Sex" = "Lower Middle",
     "Age-standardized suicide rates (per 100 000 population)" = mean(`Age-standardized suicide rates (per 100 000 population)`),
     "Age_85+" = mean(`Age_85+`),
     "Age_75-84" = mean(`Age_75-84`),
@@ -270,7 +293,7 @@ upper_middle_data <- both_table |>
   filter(Income_Group == "upper_middle")|>
   select(c(-Country)) |>
   summarise(
-    "Region/Income Group" = "Upper Middle",
+    "Region/Income/Sex" = "Upper Middle",
     "Age-standardized suicide rates (per 100 000 population)" = mean(`Age-standardized suicide rates (per 100 000 population)`),
     "Age_85+" = mean(`Age_85+`),
     "Age_75-84" = mean(`Age_75-84`),
@@ -287,7 +310,7 @@ high_income_data <- both_table |>
   filter(Income_Group == "high_income")|>
   select(c(-Country)) |>
   summarise(
-    "Region/Income Group" = "High Income",
+    "Region/Income/Sex" = "High Income",
     "Age-standardized suicide rates (per 100 000 population)" = mean(`Age-standardized suicide rates (per 100 000 population)`),
     "Age_85+" = mean(`Age_85+`),
     "Age_75-84" = mean(`Age_75-84`),
@@ -304,7 +327,7 @@ asia_data <- both_table |>
   filter(Region == "Asia")|>
   select(c(-Country)) |>
   summarise(
-    "Region/Income Group" = "Asia",
+    "Region/Income/Sex" = "Asia",
     "Age-standardized suicide rates (per 100 000 population)" = mean(`Age-standardized suicide rates (per 100 000 population)`),
     "Age_85+" = mean(`Age_85+`),
     "Age_75-84" = mean(`Age_75-84`),
@@ -321,7 +344,7 @@ africa_data <- both_table |>
   filter(Region == "Africa")|>
   select(c(-Country)) |>
   summarise(
-    "Region/Income Group" = "Africa",
+    "Region/Income/Sex" = "Africa",
     "Age-standardized suicide rates (per 100 000 population)" = mean(`Age-standardized suicide rates (per 100 000 population)`),
     "Age_85+" = mean(`Age_85+`),
     "Age_75-84" = mean(`Age_75-84`),
@@ -338,7 +361,7 @@ europe_data <- both_table |>
   filter(Region == "Europe")|>
   select(c(-Country)) |>
   summarise(
-    "Region/Income Group" = "Europe",
+    "Region/Income/Sex" = "Europe",
     "Age-standardized suicide rates (per 100 000 population)" = mean(`Age-standardized suicide rates (per 100 000 population)`),
     "Age_85+" = mean(`Age_85+`),
     "Age_75-84" = mean(`Age_75-84`),
@@ -355,7 +378,7 @@ northamerica_data <- both_table |>
   filter(Region == "North America")|>
   select(c(-Country)) |>
   summarise(
-    "Region/Income Group" = "North America",
+    "Region/Income/Sex" = "North America",
     "Age-standardized suicide rates (per 100 000 population)" = mean(`Age-standardized suicide rates (per 100 000 population)`),
     "Age_85+" = mean(`Age_85+`),
     "Age_75-84" = mean(`Age_75-84`),
@@ -372,7 +395,7 @@ southamerica_data <- both_table |>
   filter(Region == "South America")|>
   select(c(-Country)) |>
   summarise(
-    "Region/Income Group" = "South America",
+    "Region/Income/Sex" = "South America",
     "Age-standardized suicide rates (per 100 000 population)" = mean(`Age-standardized suicide rates (per 100 000 population)`),
     "Age_85+" = mean(`Age_85+`),
     "Age_75-84" = mean(`Age_75-84`),
@@ -389,7 +412,7 @@ oceania_data <- both_table |>
   filter(Region == "Oceania")|>
   select(c(-Country)) |>
   summarise(
-    "Region/Income Group" = "Oceania",
+    "Region/Income/Sex" = "Oceania",
     "Age-standardized suicide rates (per 100 000 population)" = mean(`Age-standardized suicide rates (per 100 000 population)`),
     "Age_85+" = mean(`Age_85+`),
     "Age_75-84" = mean(`Age_75-84`),
@@ -403,7 +426,9 @@ oceania_data <- both_table |>
 
 # create a summary statistic by binding all the subtables into one
 sum_sta <- rbind(
-  average_table,
+  average_data,
+  male_data,
+  female_data,
   lower_income_data,
   lower_middle_data,
   upper_middle_data,

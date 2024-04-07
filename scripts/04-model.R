@@ -1,11 +1,10 @@
 #### Preamble ####
-# Purpose: Models... 
+# Purpose: Models global suicide rates to income/region/sex and age groups using linear regression
 # Author: Hyuk Jang
-# Date: 26 Mar 2024
+# Date: 18 April 2024
 # Contact: hyuk.jang@mail.utoronto.ca
 # License: MIT
-# Pre-requisites: 
-# Any other information needed? 
+# Pre-requisites: install packages 'tidyverse', 'rstanarm', 'ggplot2', 'modelsummary', and 'tidybayes'
 
 
 #### Workspace setup ####
@@ -13,67 +12,52 @@ library(tidyverse)
 library(rstanarm)
 library(ggplot2)
 library(modelsummary)
-library(bayesplot)
-library(parameters)
-library(broom)
+library(tidybayes)
 
 #### Read data ####
-cleaned_merged_table <- read_csv("data/analysis_data/cleaned_merged_table.csv")
+sum_sta <- read_csv("data/analysis_data/sum_sta.csv")
 
 ### Model data ####
 
-# Fit Gaussian(normal) regression 
-suicide_model_normal <- stan_glm(
-  `Age-standardized suicide rates (per 100 000 population)` ~ Sex + `Age_85+` + `Age_75-84` + `Age_65-74` + `Age_55-64` + `Age_45-54` + `Age_35-44` + `Age_25-34` + `Age_15-24` + Income_Group + Region,
-  data = cleaned_merged_table,
-  family = gaussian(link = "identity")
+sum_sta_long <- sum_sta |>
+  pivot_longer(cols = starts_with("Age_"), 
+               names_to = "Age_Group", 
+               values_to = "Suicide_Rate") |>
+  select(-`Age-standardized suicide rates (per 100 000 population)`)
+
+# Plot the reshaped data
+ggplot(sum_sta_long, aes(x = `Region/Income/Sex`, y = Suicide_Rate, color = Age_Group)) +
+  geom_point() +
+  ggtitle("Global Suicide Rates by Age, region, and income group") +
+  xlab("Region/Income Group and Age Group") +
+  ylab("Suicide Rate") +
+  theme_minimal()
+
+
+# Fitting the data to a linear model
+suicide_normal_model <- stan_glm(
+  `Age-standardized suicide rates (per 100 000 population)` ~ `Region/Income/Sex` + `Age_85+` + `Age_75-84` + `Age_65-74` + `Age_55-64` + `Age_45-54` + `Age_35-44` + `Age_25-34` + `Age_15-24`,
+  data = sum_sta,
+  family = gaussian(link = "identity"),
+  prior = normal(location = 0, scale = 2.5, autoscale = TRUE),
+  prior_intercept = 
+    normal(location = 0, scale = 2.5, autoscale = TRUE),
+  seed = 123
 )
 
-# Fit multilevel Gaussian regression 
-suicide_model_multilevel <- stan_glmer(
-  `Age-standardized suicide rates (per 100 000 population)` ~ (1 | Country) + Sex + `Age_85+` + `Age_75-84` + `Age_65-74` + `Age_55-64` + `Age_45-54` + `Age_35-44` + `Age_25-34` + `Age_15-24` + Income_Group + Region,
-  data = cleaned_merged_table,
-  family = gaussian(link = "identity"),  
-  prior = normal(location = 0, scale = 3, autoscale = TRUE),
-  prior_intercept = normal(location = 0, scale = 3, autoscale = TRUE),
-  seed = 853
-)
-
-suicide_model <- stan_glmer(
-  Country ~ Sex + `Age_85+` + `Age_75-84` + `Age_65-74` + `Age_55-64` + `Age_45-54` + `Age_35-44` + `Age_25-34` + `Age_15-24` + Income_Group + Region,
-  data = cleaned_merged_table,
-  family = gaussian(link = "identity"),  
-  prior = normal(location = 0, scale = 3, autoscale = TRUE),
-  prior_intercept = normal(location = 0, scale = 3, autoscale = TRUE),
-  seed = 853
-)
-
-
-# Save the multilevel model
-saveRDS(
-  suicide_model_multilevel,
-  file = "suicide_model_multilevel.rds"
-)
-# Save the normal model
-saveRDS(
-  suicide_model_normal,
-  file = "suicide_model_normal.rds"
-)
-
-
-view(suicide_model_multilevel)
-
-library(rstanarm)
-library(ggplot2)
-library(modelsummary)
-library(bayesplot)
-library(parameters)
-library(broom)
-library(kableExtra)
-model_summary <- modelsummary(
+modelsummary(
   list(
-    "Multilevel" = suicide_model_multilevel
+    "Gaussian(Normal)" = suicide_normal_model
   )
 )
-view(model_summary)
-modelsu
+
+modelplot(suicide_normal_model, conf_level = 0.95) +
+  labs(x = "95 per cent credibility interval")
+
+
+# Save the linear model
+saveRDS(
+  suicide_normal_model,
+  file = "models/suicide_normal_model.rds"
+)
+

@@ -122,3 +122,62 @@ In this code:
 We use mutate() to create a new column income_group.
 We use case_when() to assign the appropriate income group based on the values in the Country column.
 If the country name matches any country in the lower_income, lower_middle, upper_middle, or high_income vectors, it will be assigned the corresponding income group. Otherwise, it will be set to NA.
+
+User
+author_lines_rstanarm_multilevel |>
+  spread_draws(`(Intercept)`, b[, group]) |>
+  mutate(condition_mean = `(Intercept)` + b) |>
+  ggplot(aes(y = group, x = condition_mean)) +
+  stat_halfeye() +
+  theme_minimal()
+write me something like the above for the following:
+
+# Fitting the data to a linear model
+suicide_normal_model <- stan_glm(
+  `Age-standardized suicide rates (per 100 000 population)` ~ `Region/Income Group` + `Age_85+` + `Age_75-84` + `Age_65-74` + `Age_55-64` + `Age_45-54` + `Age_35-44` + `Age_25-34` + `Age_15-24`,
+  data = sum_sta,
+  family = gaussian(link = "identity"),
+  prior = normal(location = 0, scale = 2.5, autoscale = TRUE),
+  prior_intercept = 
+    normal(location = 0, scale = 2.5, autoscale = TRUE),
+  seed = 123
+)
+
+
+modelsummary(
+  list(
+    "Gaussian(Normal)" = suicide_normal_model
+  )
+)
+ChatGPT
+To visualize the coefficients from your suicide_normal_model, you can use spread_draws from the bayesplot package, similar to the example you provided. However, note that the spread_draws function is not directly applicable to rstanarm models like stan_glm. Instead, you can access the coefficients directly from the summary of the model object and then plot them. Here's how you can do it:
+
+R
+Copy code
+# Extract coefficients and standard errors
+coef_summary <- coef(summary(suicide_normal_model))
+
+# Create a data frame with coefficients and standard errors
+coef_data <- data.frame(
+  coef = coef_summary[, 1],
+  se = coef_summary[, 2]
+)
+
+# Plot coefficients with halfeye plot
+ggplot(coef_data, aes(y = rownames(coef_data), x = coef)) +
+  geom_point() +
+  geom_errorbarh(aes(xmax = coef + 1.96 * se, xmin = coef - 1.96 * se)) +
+  theme_minimal() +
+  labs(
+    title = "Coefficients of Gaussian(Normal) Model",
+    x = "Coefficient Estimate",
+    y = "Variables"
+  )
+This code snippet creates a plot of coefficient estimates along with their 95% confidence intervals for the suicide_normal_model. Adjust the aesthetics and theme as per your preference.
+
+Additionally, you can use modelsummary to summarize the model output:
+
+R
+Copy code
+modelsummary(list("Gaussian(Normal)" = suicide_normal_model))
+This will provide a summary table displaying coefficient estimates, standard errors, z-values, and p-values for each predictor in your model. Adjustments can be made to the output format and content according to your needs.

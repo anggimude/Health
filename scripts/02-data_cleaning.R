@@ -450,8 +450,6 @@ sum_sta_long <- sum_sta |>
 
 
 # Save table as parquet, csv file
-write_csv(average_data, "~/Health/data/analysis_data/average_data.csv")
-write_csv(both_table, "~/Health/data/analysis_data/both_table.csv")
 write_csv(sum_sta, "~/Health/data/analysis_data/sum_sta.csv")
 write_parquet(sum_sta, "~/Health/data/analysis_data/sum_sta.parquet")
 write_csv(sum_sta_long, "~/Health/data/analysis_data/sum_sta_long.csv")

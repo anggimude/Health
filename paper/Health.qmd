@@ -1,6 +1,6 @@
 ---
 title: "Global suicide Rates and its correlation to country income, region, age, and gender in 2019"
-subtitle: "An analysis of global suicide rates in 2019 using negative binomial and multilevel negative binomial modelling"
+subtitle: "An analysis of global suicide rates in 2019 using multiple linear regression"
 author: 
   - Hyuk Jang
 thanks: "Code and data are available at: https://github.com/anggimude/Health."
@@ -16,65 +16,119 @@ bibliography: references.bib
 #| include: false
 #| warning: false
 #| message: false
+#| echo: false
 
+# work space setup
 library(tidyverse)
-library(palmerpenguins)
+library(dplyr)
+library(arrow)
+library(rstanarm)
+library(ggplot2)
+library(modelsummary)
+library(tidybayes)
+library(kableExtra)
+
+# read data
+
+sum_sta <- read_csv("~/Health/data/analysis_data/sum_sta.csv")
+sum_sta_long <- read_csv("~/Health/data/analysis_data/sum_sta_long.csv")
+both_table <- read_csv("~/Health/data/analysis_data/both_table.csv")
+
 ```
 
+\newpage
 
 # Introduction
 
-Suicide is defined as the act of intentionally causing one's own death. The main risk factors of suicide are mental disorders, physical disorders, and substance abuse. In 2019, 1.3% of all deaths resulted from suicide and is the fourth leading cause of deaths in 15~29 years old. This paper will dive deeper into suicide rates and its correlation between country income, age, gender, and region in 2019. The most recent year with relevant data is for 2019, from the WHO[citation] and since we are only looking into one year, we look at the global trends and world bank income group trends to get a more thorough understanding of the trends of suicide rates of 2019. Because one of the goals of the paper is to observe the correlation between suicide rates and country income and region, the countries are classified based on the world bank income group; with four income groups - low, lower-middle, upper-middle, and high. Low-income economies is defined as a country with a gross national income less than \$1135, and in the manner lower-middle is between the range \$1136 to \$4465, upper-middle in the range of \$4455 to \$13845 and high is \$13846 or more. Region is defined based on the continents; Asia, Africa, North America, South America, and Europe. The total number of countries is [number]. 
+Suicide is defined as the act of intentionally causing one's own death. The main risk factors of suicide are mental disorders, physical disorders, and substance abuse. In 2019, 1.3% of all deaths resulted from suicide and is the fourth leading cause of deaths in 15~29 years old. This paper will dive deeper into suicide rates and its correlation between country income, age, gender, and region in 2019. The most recent year with relevant data is for 2019, from the WHO[citation] and since we are only looking into one year, we look at the global trends and world bank income group trends to get a more thorough understanding of the trends of suicide rates of 2019. Because one of the goals of the paper is to observe the correlation between suicide rates and country income and region, the countries are classified based on the world bank income group; with four income groups - low, lower-middle, upper-middle, and high. Low-income economies is defined as a country with a gross national income less than \$1135, and in the manner lower-middle is between the range \$1136 to \$4465, upper-middle in the range of \$4455 to \$13845 and high is \$13846 or more. Region is defined based on the continents; Asia, Africa, North America, South America, and Europe. The total number of countries is 183 which are all mapped to different regions and income groups.   
 
-This paper will produce a negative binomial and a multilevel negative binomial model to analyze the correlation coefficients of each factor. The results of the two models will be compared to check whether the results are credible to make conclusions. In addition, we will be able to study the trends of the factors of suicide. We want to analyze the change in demographics for the different age groups, country income, region, and gender, [write more about the data used]. @citeR was used to clean the raw data to what we use for modelling. 
+This paper will produce a multiple linear regression to analyze the correlation coefficients of each factor. The results of the model will be checked by doing a 95% confident interval on the regression coefficients. In addition, we will be able to study the trends of the factors of suicide. We want to analyze the change in demographics for the different age groups, country income, region, and gender. The data was obtained from the WHO database[citaiton] under the mental health category. @citeR was used to clean the raw data to what we use for modelling in other to write an analysis of the intended study. The estimand of this paper are the intercepts and coefficients of each predictors which correspond to region/income/sex and the different age categories. 
 
 This paper has 4 sections in total not including the introduction. In @sec-data we look at the data that used to carry out the reports including tables and graphs of cleaned data that will be used for the models and the summary statistics. In the next section, we discuss about the models that will be used to analyze our cleaned data, how it is set up and the justifications of it. Next we display and examine the results obtained from the models including tables of the model summaries which helps us make predictions. Lastly, we make final discussions of our results and research based on each cause and dive into some weaknesses that our paper has. In addition, we explore some next steps we or anyone else interested is willing to take after reading this paper. [make this paragraph more specific]
 
 
 # Data {#sec-data}
 
+## Raw Data
+
+The data used in this paper is derived from WHO(@who2021global), and WHO data repository() and was downloaded from the data available in the links. WHO(@who2021global) provides data of age-standardized suicide rates per 100,000 population for 183 countries for the years 2000-2019. WHO data repository() provides data of crude suicide rates per 100,000 population for the same 183 countries for the year 2019. Since the only data avaiable data for crude suicide rates depending on age is 2019, we only look into the year 2019 for WHO() as well. The data the two tables include are the 183 countries, sex (both, male, female), age groups of 85+, 75-84, 65-74, 55-64, 45-54, 35-44, 25-34, 15-24, and age standardized suicide rates. The age-standardized suicide rate is used as the dependent variable for our model as we are interested in the correlation between the independent variables which are gender, age group, country income, and region.
+
+The cleaning, testing, and modelling of the data for this paper was done through R [@citeR] with the aid of the following packages: tidyverse [@citetidyverse], dplyr [@citedplyr], rstanarm [@citerstanarm], ggplot2 [@citeggplot2], modelsummary [@citemodelsummary], kableExtra [@citekableExtra], arrow[@citearrow], tidybayes[@citetidybayes].
+
+## Cleaned Data
+
+The goal of the cleaning process of this paper is to create a table including income group(high, upper middle, lower middle, low), sex(both, male, female), region(Asia, Europe, North America, South America, Africa, Oceania) as the rows, and age-standardized suicide rates, and the 10 year age group suicide rates. This is so that we can create a model which will provide us the correlation of global suicide rates of 2019 against income group/sex/region and age groups. To do this we merge the two raw data tables we have downloaded. Before we merge the tables, WHO() includes the age-standardized suicide rates as a form of the actual value[lower limit, upper limit]. When we create our models or graphs, the interval is not necessary, so we first remove the interval so that each column only consists of the actual rate. After merging and doing some minor cleaning like removing repeated rows and changing names of columns and rows, the table will have country, sex, age-standardized suicide rates, and the 10 year age groups. We must also include the region and income group of each data so we create a mapping so that we country will have additional columns of continent and world bank income group. Since we are looking into the global suicide rates and how the independent variables affect it, we must calculate the averages of the age-standardized suicide rates and age groups depending on sex, income group, region. 
 
 
-Some of our data is of penguins (@fig-bills), from @palmerpenguins.
 
 ```{r}
-#| label: fig-bills
-#| fig-cap: Bills of penguins
+#| label: tbl-sum_sta
+#| tbl-cap: Global Suicide Rates by Age, Region, Sex, and Income Group
 #| echo: false
+#| warning: false
 
-ggplot(penguins, aes(x = island, fill = species)) +
-  geom_bar(alpha = 0.8) +
-  scale_fill_manual(values = c("darkorange","purple","cyan4"),
-                    guide = "none") +
-  theme_minimal() +
-  facet_wrap(~species, ncol = 1) +
-  coord_flip()
+head(sum_sta, n=13) |>
+  kable(
+    col.names = c("Region/Income/Sex", "Age-standardized suicide rates (per 100 000 population)", "Age_85+", "Age_75-84", "Age_65-74", "Age_55-64", "Age_45-54", "Age_35-44", "Age_25-34", "Age_15-24"),
+    align = c("l", "r", "r", "r", "r", "r", "r", "r", "r", "r"),
+    digits = 2, 
+    booktabs = TRUE, 
+    linesep = ""
+  ) 
 ```
 
-Talk more about it.
-
-And also planes (@fig-planes). (You can change the height and width, but don't worry about doing that until you have finished every other aspect of the paper - Quarto will try to make it look nice and the defaults usually work well once you have enough text.)
-
 ```{r}
-#| label: fig-planes
-#| fig-cap: Relationship between wing length and width
+#| label: fig-sum_sta_long
+#| fig-cap: lobal Suicide Rates by Age, Region, Sex, and Income Group
 #| echo: false
 #| warning: false
 #| message: false
 
-analysis_data <- read_csv(here::here("data/analysis_data/analysis_data.csv"))
-
-analysis_data |> 
-  ggplot(aes(x = width, y = length)) +
-  geom_point(alpha = 0.8) +
-  theme_minimal() +
-  labs(x = "Wing width (mm)",
-       y = "Wing length (mm)")
+ggplot(sum_sta_long, aes(x = `Region/Income/Sex`, y = Suicide_Rate, color = Age_Group)) +
+  geom_point() +
+  ggtitle("Global Suicide Rates by Age, Region, Sex, and Income Group") +
+  xlab("Region/Income Group/Sex and Age Group") +
+  ylab("Suicide Rate") +
+  theme_minimal()
 ```
 
-Talk way more about it. 
+
+## Basic Summary Statistics
+
+@tbl-sumsta_korea is a representation of the @tbl-intersect_data_one showing its minimum, mean, maximum, standard deviation, variance, and sample size. The summary statistics shows that the mean of the number of deaths are 18320, with a minimum of 6860, and a maximum of 44109 for a sample size of 24 as the data selected is from @tbl-intersect_data_one. The standard deviation and variance may be abnormally high because the range of the data is large, in other words, because the mean is 18320, and the maximum is 44109, there is likely a few outliers in the data creating such a high standard deviation and variance.
+
+\FloatBarrier
+```{r}
+#| echo: false
+#| eval: true
+#| label: tbl-sumsta_suicide
+#| tbl-cap: "Summary statistics of the number of yearly deaths, by cause, in South Korea"
 
 
+datasummary(
+  (`Age-standardized suicide rates (per 100 000 population)` + `Age_85+` + `Age_75-84` + `Age_65-74` + `Age_55-64` + `Age_45-54` + `Age_35-44` + `Age_25-34` + `Age_15-24`) ~
+    Min + Mean + Max + SD + Var + N,
+  fmt = 0,
+  data = sum_sta
+)
+
+```
+
+```{r}
+#| label: tbl-avg_data
+#| tbl-cap: Average global data
+#| echo: false
+#| warning: false
+
+head(average_data) |>
+  kable(
+    col.names = c("Region/Income/Sex", "Age-standardized suicide rates (per 100 000 population)", "Age_85+", "Age_75-84", "Age_65-74", "Age_55-64", "Age_45-54", "Age_35-44", "Age_25-34", "Age_15-24"),
+    align = c("l", "r", "r", "r", "r", "r", "r", "r", "r", "r"),
+    digits = 2, 
+    booktabs = TRUE, 
+    linesep = ""
+  ) 
+```
 
 # Model
 

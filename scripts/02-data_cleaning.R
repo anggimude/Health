@@ -441,10 +441,18 @@ sum_sta <- rbind(
   oceania_data
 )
 
+# change format of sum_sta for graphing and modelling
+sum_sta_long <- sum_sta |>
+  pivot_longer(cols = starts_with("Age_"), 
+               names_to = "Age_Group", 
+               values_to = "Suicide_Rate") |>
+  select(-`Age-standardized suicide rates (per 100 000 population)`)
+
+
 # Save table as parquet, csv file
-write_csv(cleaned_merged_table, "data/analysis_data/cleaned_merged_table.csv")
-write_parquet(cleaned_merged_table, "data/analysis_data/cleaned_merged_table.parquet")
-write_csv(both_table, "data/analysis_data/both_table.csv")
-write_parquet(both_table, "data/analysis_data/both_table.parquet")
-write_csv(sum_sta, "data/analysis_data/sum_sta.csv")
-write_parquet(sum_sta, "data/analysis_data/sum_sta.parquet")
+write_csv(average_data, "~/Health/data/analysis_data/average_data.csv")
+write_csv(both_table, "~/Health/data/analysis_data/both_table.csv")
+write_csv(sum_sta, "~/Health/data/analysis_data/sum_sta.csv")
+write_parquet(sum_sta, "~/Health/data/analysis_data/sum_sta.parquet")
+write_csv(sum_sta_long, "~/Health/data/analysis_data/sum_sta_long.csv")
+write_parquet(sum_sta_long, "~/Health/data/analysis_data/sum_sta_long.parquet")

@@ -42,5 +42,4 @@ suicide_raw_data <- read_csv(suicide_year)
 
 # Write the downloaded data to a CSV file
 write_csv(suicide_raw_data, "data/raw_data/suicide_raw_data.csv") 
-
 write_csv(suicide_ag_data, "data/raw_data/suicide_ag_data.csv") 

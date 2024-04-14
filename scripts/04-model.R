@@ -16,20 +16,15 @@ library(tidybayes)
 
 #### Read data ####
 sum_sta <- read_csv("data/analysis_data/sum_sta.csv")
+sum_sta_long <- read_csv("data/analysis_data/sum_sta_long.csv")
 
 ### Model data ####
-
-sum_sta_long <- sum_sta |>
-  pivot_longer(cols = starts_with("Age_"), 
-               names_to = "Age_Group", 
-               values_to = "Suicide_Rate") |>
-  select(-`Age-standardized suicide rates (per 100 000 population)`)
 
 # Plot the reshaped data
 ggplot(sum_sta_long, aes(x = `Region/Income/Sex`, y = Suicide_Rate, color = Age_Group)) +
   geom_point() +
-  ggtitle("Global Suicide Rates by Age, region, and income group") +
-  xlab("Region/Income Group and Age Group") +
+  ggtitle("Global Suicide Rates by Age, Region, Sex, and Income Group") +
+  xlab("Region/Income Group/Sex and Age Group") +
   ylab("Suicide Rate") +
   theme_minimal()
 

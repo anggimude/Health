@@ -13,6 +13,7 @@ library(rstanarm)
 library(ggplot2)
 library(modelsummary)
 library(tidybayes)
+library(kableExtra)
 
 #### Read data ####
 sum_sta <- read_csv("data/analysis_data/sum_sta.csv")
@@ -49,10 +50,9 @@ modelsummary(
 modelplot(suicide_normal_model, conf_level = 0.95) +
   labs(x = "95 per cent credibility interval")
 
-
 # Save the linear model
 saveRDS(
   suicide_normal_model,
-  file = "models/suicide_normal_model.rds"
+  file = "~/Health/models/suicide_normal_model.rds"
 )
 

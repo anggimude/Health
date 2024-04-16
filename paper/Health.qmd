@@ -1,5 +1,5 @@
 ---
-title: "Global suicide Rates and its correlation to country income, region, age, and gender in 2019"
+title: "Global suicide rates and its correlation to country income, region, age, and gender in 2019"
 subtitle: "An analysis of global suicide rates in 2019 using multiple linear regression"
 author: 
   - Hyuk Jang
@@ -8,6 +8,7 @@ date: today
 date-format: long
 abstract: "Suicide has become a main cause of deaths globally over the decades. This creates curiosity in what immutable factors may be affecting suicide rates. This paper looks into the correlation between suicide rates and gender, sex, age, country income, and region. Then further analysis is done by looking into human resources available in each country."
 format: pdf
+toc: true
 number-sections: true
 bibliography: references.bib
 ---
@@ -33,14 +34,15 @@ library(kableExtra)
 sum_sta <- read_csv("~/Health/data/analysis_data/sum_sta.csv")
 sum_sta_long <- read_csv("~/Health/data/analysis_data/sum_sta_long.csv")
 both_table <- read_csv("~/Health/data/analysis_data/both_table.csv")
-
+suicide_normal_model <-
+  readRDS(file = here::here("~/Health/models/suicide_normal_model.rds"))
 ```
 
 \newpage
 
 # Introduction
 
-Suicide is defined as the act of intentionally causing one's own death. The main risk factors of suicide are mental disorders, physical disorders, and substance abuse. In 2019, 1.3% of all deaths resulted from suicide and is the fourth leading cause of deaths in 15~29 years old. This paper will dive deeper into suicide rates and its correlation between country income, age, gender, and region in 2019. The most recent year with relevant data is for 2019, from the WHO[citation] and since we are only looking into one year, we look at the global trends and world bank income group trends to get a more thorough understanding of the trends of suicide rates of 2019. Because one of the goals of the paper is to observe the correlation between suicide rates and country income and region, the countries are classified based on the world bank income group; with four income groups - low, lower-middle, upper-middle, and high. Low-income economies is defined as a country with a gross national income less than \$1135, and in the manner lower-middle is between the range \$1136 to \$4465, upper-middle in the range of \$4455 to \$13845 and high is \$13846 or more. Region is defined based on the continents; Asia, Africa, North America, South America, and Europe. The total number of countries is 183 which are all mapped to different regions and income groups.   
+Suicide is defined as the act of intentionally causing one's own death. The main risk factors of suicide are mental disorders, physical disorders, and substance abuse. In particular there is a significant correlation between suicidal behaviour and mental health[write more about this based on research]. In 2019, 1.3% of all deaths resulted from suicide and is the fourth leading cause of deaths in 15~29 years old. This paper will dive deeper into suicide rates and its correlation between country income, age, gender, and region in 2019. The most recent year with relevant data is for 2019, from the WHO[citation] and since we are only looking into one year, we look at the global trends and world bank income group trends to get a more thorough understanding of the trends of suicide rates of 2019. Because one of the goals of the paper is to observe the correlation between suicide rates and country income and region, the countries are classified based on the world bank income group; with four income groups - low, lower-middle, upper-middle, and high. Low-income economies is defined as a country with a gross national income less than \$1135, and in the manner lower-middle is between the range \$1136 to \$4465, upper-middle in the range of \$4455 to \$13845 and high is \$13846 or more. Region is defined based on the continents; Asia, Africa, North America, South America, and Europe. The total number of countries is 183 which are all mapped to different regions and income groups.   
 
 This paper will produce a multiple linear regression to analyze the correlation coefficients of each factor. The results of the model will be checked by doing a 95% confident interval on the regression coefficients. In addition, we will be able to study the trends of the factors of suicide. We want to analyze the change in demographics for the different age groups, country income, region, and gender. The data was obtained from the WHO database[citaiton] under the mental health category. @citeR was used to clean the raw data to what we use for modelling in other to write an analysis of the intended study. The estimand of this paper are the intercepts and coefficients of each predictors which correspond to region/income/sex and the different age categories. 
 
@@ -57,9 +59,11 @@ The cleaning, testing, and modelling of the data for this paper was done through
 
 ## Cleaned Data
 
-The goal of the cleaning process of this paper is to create a table including income group(high, upper middle, lower middle, low), sex(both, male, female), region(Asia, Europe, North America, South America, Africa, Oceania) as the rows, and age-standardized suicide rates, and the 10 year age group suicide rates. This is so that we can create a model which will provide us the correlation of global suicide rates of 2019 against income group/sex/region and age groups. To do this we merge the two raw data tables we have downloaded. Before we merge the tables, WHO() includes the age-standardized suicide rates as a form of the actual value[lower limit, upper limit]. When we create our models or graphs, the interval is not necessary, so we first remove the interval so that each column only consists of the actual rate. After merging and doing some minor cleaning like removing repeated rows and changing names of columns and rows, the table will have country, sex, age-standardized suicide rates, and the 10 year age groups. We must also include the region and income group of each data so we create a mapping so that we country will have additional columns of continent and world bank income group. Since we are looking into the global suicide rates and how the independent variables affect it, we must calculate the averages of the age-standardized suicide rates and age groups depending on sex, income group, region. 
+The goal of the cleaning process of this paper is to create a table including income group(high, upper middle, lower middle, low), sex(both, male, female), region(Asia, Europe, North America, South America, Africa, Oceania) as the rows, and age-standardized suicide rates, and the 10 year age group suicide rates. This is so that we can create a model which will provide us the correlation of global suicide rates of 2019 against income group/sex/region and age groups. To do this we merge the two raw data tables we have downloaded. Before we merge the tables, WHO() includes the age-standardized suicide rates as a form of the actual value[lower limit, upper limit]. When we create our models or graphs, the interval is not necessary, so we first remove the interval so that each column only consists of the actual rate. After merging and doing some minor cleaning like removing repeated rows and changing names of columns and rows, the table will have country, sex, age-standardized suicide rates, and the 10 year age groups. We must also include the region and income group of each data so we create a mapping so that we country will have additional columns of continent and world bank income group. This was done based on the information provided from [citation] [citatiom]. Since we are looking into the global suicide rates and how the independent variables affect it, we must calculate the averages of the age-standardized suicide rates and age groups depending on sex, income group, region. The table with age-standardized suicide rates and suicide rates for the 10 year age groups depending on the 183 countries is available in @sec-both_table_details.
 
+Below, @tbl-sum_sta is a table of the averages of suicide rates of age standardized and 10 year age groups depending on region, country income, and sex. The rows include global, male, female, lower income, lower-middle income, upper-middle, high income, Asia, Europe, North America, South America, Africa, and Oceania. We observe the average suicide rates of each of these variables for age-standardized and the 10 year age groups. The most noticeable trend from @tbl-sum_sta is the difference in suicide rates in male and female. While female had a suicide rate of 4.54, male's was 16.14 and the global average being 10.09 exhibiting significance of further research. Within the income groups, we see that the lower income groups tend to have a higher average suicide rate compared to the higher income countries. The lower income groups have an average of around 11.50 while the comparatively higher income is 9.00. The difference is not significant as the global average is 10.00, but it is worth looking into these trends in @sec-discussion. Comparing the data of each region, we can notice that Asia, North America, and Europe are below the average, on the other hand, South America, Oceania, and Africa have suicide rates above the average. For the regions, the deviation from the global average is larger than income groups, but smaller than sex. Here we can notice the similarities with the income group data. For example, a large proportion of African and South American countries lie in the lower and lower-middle income bracket which has a comparably higher suicide rate, and it shows that South America and Africa have a suicide rate of 11.44 and 13.40 respectively.
 
+@fig-graph_1 and @fig-graph_2 show the @tbl-sum_sta as a scatter plot. The graph is divided into two to improve clarity and legibility. The split allows for easier viewing of labels, axis, and point, ensuring a better understanding of the data. The scatter plot is build for an analysis of the age group trends. We can observe that the older age groups, Age 85+ and Age 75-84 have the highest suicide rates. Especially the 85+ age group is an outlier in every region/income/sex group. We can also notice that the younger the age, the lower suicide rates tends to be. Some notable exceptions are Oceania's high suicide rate among the ages 15-44. Unlike the other region/income/sex groups, Oceania's younger generation and 85+ has the highest suicide rates. In addition, the older the age group, we notice more extreme suicide rates that goes above 100 per 100,000 population. This occurs three times all of which are in 85+ of age, and male, lower income, and Africa displays such results. The x-axis variables other than Africa, male, and lower income, the data points tend to be gathered up around the average of each variable, meaning that the standard deviation of each region/income group/sex is small.
 
 ```{r}
 #| label: tbl-sum_sta
@@ -69,7 +73,7 @@ The goal of the cleaning process of this paper is to create a table including in
 
 head(sum_sta, n=13) |>
   kable(
-    col.names = c("Region/Income/Sex", "Age-standardized suicide rates (per 100 000 population)", "Age_85+", "Age_75-84", "Age_65-74", "Age_55-64", "Age_45-54", "Age_35-44", "Age_25-34", "Age_15-24"),
+    col.names = c("Region/Income/Sex", "Age-standardized suicide rates (per 100 000 population)", "Age 85+", "Age 75-84", "Age 65-74", "Age 55-64", "Age 45-54", "Age 35-44", "Age 25-34", "Age 15-24"),
     align = c("l", "r", "r", "r", "r", "r", "r", "r", "r", "r"),
     digits = 2, 
     booktabs = TRUE, 
@@ -78,31 +82,56 @@ head(sum_sta, n=13) |>
 ```
 
 ```{r}
-#| label: fig-sum_sta_long
-#| fig-cap: lobal Suicide Rates by Age, Region, Sex, and Income Group
+#| label: fig-graph_1
+#| fig-cap: Global Suicide Rates by Age, Region, Sex, and Income Group - 1
 #| echo: false
 #| warning: false
 #| message: false
 
-ggplot(sum_sta_long, aes(x = `Region/Income/Sex`, y = Suicide_Rate, color = Age_Group)) +
+
+group_1 <- sum_sta_long %>% filter(`Region/Income/Sex` %in% c("Global", "Male", "Female", "Lower Income", "Lower Middle", "Upper Middle", "High Income"))
+group_2 <- sum_sta_long %>% filter(`Region/Income/Sex` %in% c("Asia", "North America", "Europe", "South America", "Africa", "Oceania"))
+
+# Plot for Group 1
+graph_1 <- ggplot(group_1, aes(x = `Region/Income/Sex`, y = Suicide_Rate, color = Age_Group)) +
   geom_point() +
   ggtitle("Global Suicide Rates by Age, Region, Sex, and Income Group") +
-  xlab("Region/Income Group/Sex and Age Group") +
+  xlab("Region/Income Group/Sex") +
   ylab("Suicide Rate") +
   theme_minimal()
+print(graph_1)
+```
+
+```{r}
+#| label: fig-graph_2
+#| fig-cap: Global Suicide Rates by Age, Region, Sex, and Income Group - 2
+#| echo: false
+#| warning: false
+#| message: false
+
+
+# Plot for Group 2
+graph_2 <- ggplot(group_2, aes(x = `Region/Income/Sex`, y = Suicide_Rate, color = Age_Group)) +
+  geom_point() +
+  ggtitle("Global Suicide Rates by Age, Region, Sex, and Income Group") +
+  xlab("Region/Income Group/Sex") +
+  ylab("Suicide Rate") +
+  theme_minimal()
+
+print(graph_2)
 ```
 
 
 ## Basic Summary Statistics
 
-@tbl-sumsta_korea is a representation of the @tbl-intersect_data_one showing its minimum, mean, maximum, standard deviation, variance, and sample size. The summary statistics shows that the mean of the number of deaths are 18320, with a minimum of 6860, and a maximum of 44109 for a sample size of 24 as the data selected is from @tbl-intersect_data_one. The standard deviation and variance may be abnormally high because the range of the data is large, in other words, because the mean is 18320, and the maximum is 44109, there is likely a few outliers in the data creating such a high standard deviation and variance.
+@tbl-sumsta is a representation of an summary of the suicide rates of the different age groups. The summary includes the minimum, maximum, mean, standard deviation, variance, and number of observations. The observations is 13 as the summary is created from @tbl-sum_sta, and we have 13 rows representing region/income group/sex. It is shown that the age-standardized suicide rate has a mean of 10, with a minimum of 5, and a maximum of 16. Again it is noticeable that the older the age, suicide rate is higher. Moreover, the variance also gets larger, the older the age group. For example, because age 85+ group has a range of 14 to 132, and a mean of 59 which leads to a extreme variance of 1806 as the data is skewed off the global averages. As the younger the age group, the summary becomes more similar to the global average. The age groups from 15-74 are clustered around a mean of 15, and the ages 75~ consists of means higher than the previous group. 
 
-\FloatBarrier
+
 ```{r}
 #| echo: false
 #| eval: true
-#| label: tbl-sumsta_suicide
-#| tbl-cap: "Summary statistics of the number of yearly deaths, by cause, in South Korea"
+#| label: tbl-sumsta
+#| tbl-cap: "Summary statistics of suicide rates of different age groups"
 
 
 datasummary(
@@ -114,21 +143,7 @@ datasummary(
 
 ```
 
-```{r}
-#| label: tbl-avg_data
-#| tbl-cap: Average global data
-#| echo: false
-#| warning: false
 
-head(average_data) |>
-  kable(
-    col.names = c("Region/Income/Sex", "Age-standardized suicide rates (per 100 000 population)", "Age_85+", "Age_75-84", "Age_65-74", "Age_55-64", "Age_45-54", "Age_35-44", "Age_25-34", "Age_15-24"),
-    align = c("l", "r", "r", "r", "r", "r", "r", "r", "r", "r"),
-    digits = 2, 
-    booktabs = TRUE, 
-    linesep = ""
-  ) 
-```
 
 # Model
 
@@ -161,40 +176,43 @@ We can use maths by including latex between dollar signs, for instance $\theta$.
 
 # Results
 
-Our results are summarized in @tbl-modelresults.
+Our results are summarized in @tbl-modelsum.
+
 
 ```{r}
 #| echo: false
 #| eval: true
-#| warning: false
-#| message: false
-
-library(rstanarm)
-
-first_model <-
-  readRDS(file = here::here("models/first_model.rds"))
-```
-
-```{r}
-#| echo: false
-#| eval: true
-#| label: tbl-modelresults
+#| label: tbl-modelsum
 #| tbl-cap: "Explanatory models of flight time based on wing width and wing length"
 #| warning: false
 
-modelsummary::modelsummary(
+modelsummary(
   list(
-    "First model" = first_model
+    "Gaussian(Normal)" = suicide_normal_model
   ),
   statistic = "mad",
-  fmt = 2
-)
+  fmt = 2,
+  output = "kableExtra"
+) |>
+  kable_styling(font_size = 8.5)
+
+
+```
+
+```{r}
+#| echo: false
+#| eval: true
+#| label: tbl-creintv
+#| tbl-cap: "Credibility intervals for the independent variables of age-standardized suicide rates"
+#| warning: false
+
+modelplot(suicide_normal_model, conf_level = 0.95) +
+  labs(x = "95 per cent credibility interval")
+
 ```
 
 
-
-
-# Discussion
+# Discussion {#sec-discussion}
 
 ## First discussion point {#sec-first-point}
 
@@ -215,15 +233,41 @@ Weaknesses and next steps should also be included.
 # Appendix {-}
 
 
-# Additional data details
+# Additional data details {#sec-both_table_details}
+```{r}
+#| label: tbl-both_table
+#| tbl-cap: Suicide rates for different countries for each age group
+#| echo: false
+#| warning: false
+
+clean_both_table <- both_table |>
+  select(c("Country", "Age-standardized suicide rates (per 100 000 population)", "Income_Group", 
+           "Region"))
+head(clean_both_table, n=183) |>
+  kable(
+    col.names = c("Country", "Age-standardized suicide rates", "Income Group", "Region"),
+    align = c("l", "r", "l", "l"),
+    digits = 2, 
+    booktabs = TRUE, 
+    linesep = ""
+  ) |>
+  kable_styling(full_width = FALSE) |>
+  column_spec(1, width = "3cm") |>
+  column_spec(2, width = "3cm") |>
+  column_spec(3, width = "3cm") |>
+  column_spec(4, width = "3cm")
+
+
+
+```
 
 # Model details {#sec-model-details}
 
 ## Posterior predictive check
 
-In @fig-ppcheckandposteriorvsprior-1 we implement a posterior predictive check. This shows...
+In we implement a posterior predictive check. This shows...
 
-In @fig-ppcheckandposteriorvsprior-2 we compare the posterior with the prior. This shows... 
+. 
 
 ```{r}
 #| eval: true
@@ -235,37 +279,12 @@ In @fig-ppcheckandposteriorvsprior-2 we compare the posterior with the prior. Th
 #| fig-cap: "Examining how the model fits, and is affected by, the data"
 #| fig-subcap: ["Posterior prediction check", "Comparing the posterior with the prior"]
 
-pp_check(first_model) +
+pp_check(suicide_normal_model) +
   theme_classic() +
   theme(legend.position = "bottom")
 
-posterior_vs_prior(first_model) +
-  theme_minimal() +
-  scale_color_brewer(palette = "Set1") +
-  theme(legend.position = "bottom") +
-  coord_flip()
 ```
 
-## Diagnostics
-
-@fig-stanareyouokay-1 is a trace plot. It shows... This suggests...
-
-@fig-stanareyouokay-2 is a Rhat plot. It shows... This suggests...
-
-```{r}
-#| echo: false
-#| eval: true
-#| message: false
-#| warning: false
-#| label: fig-stanareyouokay
-#| fig-cap: "Checking the convergence of the MCMC algorithm"
-#| fig-subcap: ["Trace plot", "Rhat plot"]
-#| layout-ncol: 2
-
-plot(first_model, "trace")
-
-plot(first_model, "rhat")
-```
 
 
 

@@ -4,7 +4,7 @@
 # Date: 18 April 2024
 # Contact: hyuk.jang@mail.utoronto.ca
 # License: MIT
-# Pre-requisites: install packages 'tidyverse', 'rstanarm', 'ggplot2', 'modelsummary', and 'tidybayes'
+# Pre-requisites: install packages 'tidyverse', 'rstanarm', 'ggplot2', 'modelsummary', 'kableExtra', and 'tidybayes'
 
 
 #### Workspace setup ####
@@ -41,12 +41,16 @@ suicide_normal_model <- stan_glm(
   seed = 123
 )
 
+# create a model summary
 modelsummary(
   list(
     "Gaussian(Normal)" = suicide_normal_model
-  )
-)
+  ),
+  statistic = "mad",
+  fmt = 2
+) 
 
+# create a credibility interval of 95%
 modelplot(suicide_normal_model, conf_level = 0.95) +
   labs(x = "95 per cent credibility interval")
 
@@ -55,4 +59,3 @@ saveRDS(
   suicide_normal_model,
   file = "~/Health/models/suicide_normal_model.rds"
 )
-

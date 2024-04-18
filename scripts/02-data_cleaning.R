@@ -448,10 +448,50 @@ sum_sta_long <- sum_sta |>
                values_to = "Suicide_Rate") |>
   select(-`Age-standardized suicide rates (per 100 000 population)`)
 
+# create a table of only country and suicide rates
+clean_both_table <- both_table |>
+  select(c("Country", "Age-standardized suicide rates (per 100 000 population)"))
+
+# read in unemployment data of 2019. 
+imf_ue <- read_csv("~/Health/data/raw_data/imfunemploymentglobal.csv")
+# rename columns of unemployment data
+imf_ue <- imf_ue |>
+  rename(
+    "Country" = "Unemployment rate (Percent)",
+    "Unemployment rate (percent)" = "2019" 
+  ) 
+
+# rename country so that the two tables to merge match
+imf_ue$Country[imf_ue$Country == "Bahamas, The"] <- "Bahamas"
+imf_ue$Country[imf_ue$Country == "Bolivia"] <- "Bolivia (Plurinational State of)"
+imf_ue$Country[imf_ue$Country == "China, People's Republic of"] <- "China"
+imf_ue$Country[imf_ue$Country == "Czech Republic"] <- "Czechia"
+imf_ue$Country[imf_ue$Country == "Iran"] <- "Iran (Islamic Republic of)"
+imf_ue$Country[imf_ue$Country == "Korea, Republic of"] <- "Republic of Korea"
+imf_ue$Country[imf_ue$Country == "Kyrgyz Republic"] <- "Kyrgyzstan"
+imf_ue$Country[imf_ue$Country == "Netherlands"] <- "Netherlands (Kingdom of the)"
+imf_ue$Country[imf_ue$Country == "Slovak Republic"] <- "Slovakia"
+imf_ue$Country[imf_ue$Country == "Syria"] <- "Syrian Arab Republic"
+imf_ue$Country[imf_ue$Country == "São Tomé and Príncipe"] <- "Sao Tome and Principe"
+imf_ue$Country[imf_ue$Country == "Türkiye, Republic of"] <- "Turkiye"
+imf_ue$Country[imf_ue$Country == "United States"] <- "United Kingdom of Great Britain and Northern Ireland"
+imf_ue$Country[imf_ue$Country == "Venezuela"] <- "Venezuela (Bolivarian Republic of)"
+imf_ue$Country[imf_ue$Country == "Vietnam"] <- "Viet Nam"
+imf_ue <- imf_ue[!is.na(imf_ue$`Unemployment rate (percent)`) & imf_ue$`Unemployment rate (percent)` != "no data", ]
+
+
+# merge unemplyment table and clean_both_table
+unemply_both <- inner_join(clean_both_table, imf_ue, by = "Country")
+
+# change column class
+unemply_both$`Age-standardized suicide rates (per 100 000 population)` <- as.numeric(unemply_both$`Age-standardized suicide rates (per 100 000 population)`)
+unemply_both$`Unemployment rate (percent)` <- as.numeric(unemply_both$`Unemployment rate (percent)`)
+
 
 # Save table as parquet, csv file
-write_csv(both_table, "~/Health/data/analysis_data/both_table")
+write_csv(both_table, "~/Health/data/analysis_data/both_table.csv")
 write_csv(sum_sta, "~/Health/data/analysis_data/sum_sta.csv")
+write_csv(unemply_both, "~/Health/data/analysis_data/unemply_both.csv")
 write_parquet(sum_sta, "~/Health/data/analysis_data/sum_sta.parquet")
 write_csv(sum_sta_long, "~/Health/data/analysis_data/sum_sta_long.csv")
 write_parquet(sum_sta_long, "~/Health/data/analysis_data/sum_sta_long.parquet")

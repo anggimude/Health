@@ -1,12 +1,12 @@
 ---
-title: "Global suicide rates and its correlation to country income, region, age, and gender in 2019"
+title: "A Linear Regression on Global Suicide Rates and Country Income, Region, Age, and Sex in 2019"
 subtitle: "An analysis of global suicide rates in 2019 using multiple linear regression"
 author: 
   - Hyuk Jang
 thanks: "Code and data are available at: https://github.com/anggimude/Health."
 date: today
 date-format: long
-abstract: "Suicide has become a main cause of deaths globally over the decades. This creates curiosity in what immutable factors may be affecting suicide rates. This paper looks into the correlation between suicide rates and gender, sex, age, country income, and region. Then further analysis is done by looking into human resources available in each country."
+abstract: "Suicide has become a main cause of death globally over the past decades. This creates curiosity in what immutable factors may be affecting suicide rates. This paper looks into the regression between global suicide rates and sex, age, country income, and region. Our results show that there is a weak correlation to age and region/country income affect suicide rates more. Then further analysis is done by studying what factors generate such tendencies."
 format: pdf
 toc: true
 number-sections: true
@@ -36,15 +36,16 @@ sum_sta_long <- read_csv("~/Health/data/analysis_data/sum_sta_long.csv")
 both_table <- read_csv("~/Health/data/analysis_data/both_table.csv")
 suicide_normal_model <-
   readRDS(file = here::here("~/Health/models/suicide_normal_model.rds"))
+unemply_both <- read_csv("~/Health/data/analysis_data/unemply_both.csv")
 ```
 
 \newpage
 
 # Introduction
 
-Suicide is defined as the act of intentionally causing one's own death. The main risk factors of suicide are mental disorders, physical disorders, and substance abuse. In particular there is a significant correlation between suicidal behaviour and mental health[write more about this based on research]. In 2019, 1.3% of all deaths resulted from suicide and is the fourth leading cause of deaths in 15~29 years old. This paper will dive deeper into suicide rates and its correlation between country income, age, gender, and region in 2019. The most recent year with relevant data is for 2019, from the WHO[citation] and since we are only looking into one year, we look at the global trends and world bank income group trends to get a more thorough understanding of the trends of suicide rates of 2019. Because one of the goals of the paper is to observe the correlation between suicide rates and country income and region, the countries are classified based on the world bank income group; with four income groups - low, lower-middle, upper-middle, and high. Low-income economies is defined as a country with a gross national income less than \$1135, and in the manner lower-middle is between the range \$1136 to \$4465, upper-middle in the range of \$4455 to \$13845 and high is \$13846 or more. Region is defined based on the continents; Asia, Africa, North America, South America, and Europe. The total number of countries is 183 which are all mapped to different regions and income groups.   
+Suicide is defined as the act of intentionally causing one's own death. The main risk factors of suicide are mental disorders, physical disorders, and substance abuse. In particular there is a significant correlation between suicidal behaviour and mental health. Most suicides are related to any sort of mental disorder ranging from trauma, personality, anxiety, depression, substance abuse, and so forth. In 2019, 1.3% of all deaths resulted from suicide and is the fourth leading cause of deaths in 15~29 years old. This paper will dive deeper into suicide rates and its correlation between country income, age, gender, and region in 2019. The most recent year with relevant data is for 2019, from the WHO(@who2021crude) and since we are only looking into one year, we look at the global trends and world bank income group trends to get a more thorough understanding of the trends of suicide rates of 2019. Because the main goal of the paper is to observe the correlation between suicide rates and country income and region, the countries are classified based on the world bank income group; with four income groups - low, lower-middle, upper-middle, and high. Low-income economies is defined as a country with a gross national income less than \$1135, and in the manner lower-middle is between the range \$1136 to \$4465, upper-middle in the range of \$4455 to \$13845 and high is \$13846 or more. Region is defined based on the continents; Asia, Africa, North America, South America, and Europe. The total number of countries is 183 which are all mapped to different regions and income groups.   
 
-This paper will produce a multiple linear regression to analyze the correlation coefficients of each factor. The results of the model will be checked by doing a 95% confident interval on the regression coefficients. In addition, we will be able to study the trends of the factors of suicide. We want to analyze the change in demographics for the different age groups, country income, region, and gender. The data was obtained from the WHO database[citaiton] under the mental health category. @citeR was used to clean the raw data to what we use for modelling in other to write an analysis of the intended study. The estimand of this paper are the intercepts and coefficients of each predictors which correspond to region/income/sex and the different age categories. 
+This paper will produce a multiple linear regression to analyze the regression coefficients of each factor. The results of the model will be checked by doing a 95% confident interval on the regression coefficients. In addition, we will be able to study the trends of the factors of suicide. We want to analyze the change in demographics for the different age groups, country income, region, and gender. The data was obtained from the WHO database under the mental health category(@who2021mentalhealth). @citeR was used to clean the raw data to what we use for modelling in other to write an analysis of the intended study. The estimand of this paper are the intercept and coefficients of each predictors which correspond to region/income/sex and the different age categories. 
 
 This paper has 4 sections in total not including the introduction. In @sec-data we look at the data that used to carry out the reports including tables and graphs of cleaned data that will be used for the models and the summary statistics. In the next section, we discuss about the models that will be used to analyze our cleaned data, how it is set up and the justifications of it. Next we display and examine the results obtained from the models including tables of the model summaries which helps us make predictions. Lastly, we make final discussions of our results and research based on each cause and dive into some weaknesses that our paper has. In addition, we explore some next steps we or anyone else interested is willing to take after reading this paper. [make this paragraph more specific]
 
@@ -53,17 +54,17 @@ This paper has 4 sections in total not including the introduction. In @sec-data 
 
 ## Raw Data
 
-The data used in this paper is derived from WHO(@who2021global), and WHO data repository() and was downloaded from the data available in the links. WHO(@who2021global) provides data of age-standardized suicide rates per 100,000 population for 183 countries for the years 2000-2019. WHO data repository() provides data of crude suicide rates per 100,000 population for the same 183 countries for the year 2019. Since the only data avaiable data for crude suicide rates depending on age is 2019, we only look into the year 2019 for WHO() as well. The data the two tables include are the 183 countries, sex (both, male, female), age groups of 85+, 75-84, 65-74, 55-64, 45-54, 35-44, 25-34, 15-24, and age standardized suicide rates. The age-standardized suicide rate is used as the dependent variable for our model as we are interested in the correlation between the independent variables which are gender, age group, country income, and region.
+The data used in this paper is derived from WHO(@who2021agestandardized), and WHO data repository(@who2021crude) and was downloaded from the data available in the links. WHO(@who2021agestandardized) provides data of age-standardized suicide rates per 100,000 population for 183 countries for the years 2000-2019. WHO data repository provides data of crude suicide rates per 100,000 population for the same 183 countries for the year 2019. Since the only data available data for crude suicide rates depending on age is 2019, we only look into the year 2019 for the age-standardized dataset as well. The data the two tables include are the 183 countries, sex (both, male, female), age groups of 85+, 75-84, 65-74, 55-64, 45-54, 35-44, 25-34, 15-24, and age standardized suicide rates. The age-standardized suicide rate is used as the dependent variable for our model as we are interested in the correlation between the independent variables which are gender, age group, country income, and region.
 
 The cleaning, testing, and modelling of the data for this paper was done through R [@citeR] with the aid of the following packages: tidyverse [@citetidyverse], dplyr [@citedplyr], rstanarm [@citerstanarm], ggplot2 [@citeggplot2], modelsummary [@citemodelsummary], kableExtra [@citekableExtra], arrow[@citearrow], tidybayes[@citetidybayes].
 
 ## Cleaned Data
 
-The goal of the cleaning process of this paper is to create a table including income group(high, upper middle, lower middle, low), sex(both, male, female), region(Asia, Europe, North America, South America, Africa, Oceania) as the rows, and age-standardized suicide rates, and the 10 year age group suicide rates. This is so that we can create a model which will provide us the correlation of global suicide rates of 2019 against income group/sex/region and age groups. To do this we merge the two raw data tables we have downloaded. Before we merge the tables, WHO() includes the age-standardized suicide rates as a form of the actual value[lower limit, upper limit]. When we create our models or graphs, the interval is not necessary, so we first remove the interval so that each column only consists of the actual rate. After merging and doing some minor cleaning like removing repeated rows and changing names of columns and rows, the table will have country, sex, age-standardized suicide rates, and the 10 year age groups. We must also include the region and income group of each data so we create a mapping so that we country will have additional columns of continent and world bank income group. This was done based on the information provided from [citation] [citatiom]. Since we are looking into the global suicide rates and how the independent variables affect it, we must calculate the averages of the age-standardized suicide rates and age groups depending on sex, income group, region. The table with age-standardized suicide rates and suicide rates for the 10 year age groups depending on the 183 countries is available in @sec-both_table_details.
+The goal of the cleaning process of this paper is to create a table including income group(high, upper middle, lower middle, low), sex(both, male, female), region(Asia, Europe, North America, South America, Africa, Oceania) as the rows, and age-standardized suicide rates, and the 10 year age group suicide rates. This is so that we can create a model which will provide us the correlation of global suicide rates of 2019 against income group/sex/region and age groups. To do this we merge the two raw data tables we have downloaded. Before we merge the tables, WHO includes the age-standardized suicide rates as a form of the actual value[lower limit, upper limit]. When we create our models or graphs, the interval is not necessary, so we first remove the interval so that each column only consists of the actual rate. After merging and doing some minor cleaning like removing repeated rows and changing names of columns and rows, the table will have country, sex, age-standardized suicide rates, and the 10 year age groups. We must also include the region and income group of each data so we create a mapping so that we country will have additional columns of continent and world bank income group. This was done based on the information provided from (@worldbank2024country) and (@worldpopulation2024countries). Since we are looking into the global suicide rates and how the independent variables affect it, we must calculate the averages of the age-standardized suicide rates and age groups depending on sex, income group, region. The table with age-standardized suicide rates and suicide rates for the 10 year age groups depending on the 183 countries is available in @sec-both_table_details.
 
 Below, @tbl-sum_sta is a table of the averages of suicide rates of age standardized and 10 year age groups depending on region, country income, and sex. The rows include global, male, female, lower income, lower-middle income, upper-middle, high income, Asia, Europe, North America, South America, Africa, and Oceania. We observe the average suicide rates of each of these variables for age-standardized and the 10 year age groups. The most noticeable trend from @tbl-sum_sta is the difference in suicide rates in male and female. While female had a suicide rate of 4.54, male's was 16.14 and the global average being 10.09 exhibiting significance of further research. Within the income groups, we see that the lower income groups tend to have a higher average suicide rate compared to the higher income countries. The lower income groups have an average of around 11.50 while the comparatively higher income is 9.00. The difference is not significant as the global average is 10.00, but it is worth looking into these trends in @sec-discussion. Comparing the data of each region, we can notice that Asia, North America, and Europe are below the average, on the other hand, South America, Oceania, and Africa have suicide rates above the average. For the regions, the deviation from the global average is larger than income groups, but smaller than sex. Here we can notice the similarities with the income group data. For example, a large proportion of African and South American countries lie in the lower and lower-middle income bracket which has a comparably higher suicide rate, and it shows that South America and Africa have a suicide rate of 11.44 and 13.40 respectively.
 
-@fig-graph_1 and @fig-graph_2 show the @tbl-sum_sta as a scatter plot. The graph is divided into two to improve clarity and legibility. The split allows for easier viewing of labels, axis, and point, ensuring a better understanding of the data. The scatter plot is build for an analysis of the age group trends. We can observe that the older age groups, Age 85+ and Age 75-84 have the highest suicide rates. Especially the 85+ age group is an outlier in every region/income/sex group. We can also notice that the younger the age, the lower suicide rates tends to be. Some notable exceptions are Oceania's high suicide rate among the ages 15-44. Unlike the other region/income/sex groups, Oceania's younger generation and 85+ has the highest suicide rates. In addition, the older the age group, we notice more extreme suicide rates that goes above 100 per 100,000 population. This occurs three times all of which are in 85+ of age, and male, lower income, and Africa displays such results. The x-axis variables other than Africa, male, and lower income, the data points tend to be gathered up around the average of each variable, meaning that the standard deviation of each region/income group/sex is small.
+@fig-graph_1 and @fig-graph_2 shows the @tbl-sum_sta as a scatter plot. The graph is divided into two to improve clarity and legibility. The split allows for easier viewing of labels, axis, and point, ensuring a better understanding of the data. The scatter plot is build for an analysis of the age group trends. We can observe that the older age groups, Age 85+ and Age 75-84 have the highest suicide rates. Especially the 85+ age group is an outlier in every region/income/sex group. We can also notice that the younger the age, the lower suicide rates tends to be. Some notable exceptions are Oceania's high suicide rate among the ages 15-44. Unlike the other region/income/sex groups, Oceania's younger generation and 85+ has the highest suicide rates. In addition, the older the age group, we notice more extreme suicide rates that goes above 100 per 100,000 population. This occurs three times all of which are in 85+ of age, and male, lower income, and Africa displays such results. The x-axis variables other than Africa, male, and lower income, the data points tend to be gathered up around the average of each variable, meaning that the standard deviation of each region/income group/sex is small.
 
 ```{r}
 #| label: tbl-sum_sta
@@ -88,7 +89,6 @@ head(sum_sta, n=13) |>
 #| warning: false
 #| message: false
 
-
 group_1 <- sum_sta_long %>% filter(`Region/Income/Sex` %in% c("Global", "Male", "Female", "Lower Income", "Lower Middle", "Upper Middle", "High Income"))
 group_2 <- sum_sta_long %>% filter(`Region/Income/Sex` %in% c("Asia", "North America", "Europe", "South America", "Africa", "Oceania"))
 
@@ -99,6 +99,7 @@ graph_1 <- ggplot(group_1, aes(x = `Region/Income/Sex`, y = Suicide_Rate, color 
   xlab("Region/Income Group/Sex") +
   ylab("Suicide Rate") +
   theme_minimal()
+
 print(graph_1)
 ```
 
@@ -109,7 +110,6 @@ print(graph_1)
 #| warning: false
 #| message: false
 
-
 # Plot for Group 2
 graph_2 <- ggplot(group_2, aes(x = `Region/Income/Sex`, y = Suicide_Rate, color = Age_Group)) +
   geom_point() +
@@ -119,6 +119,7 @@ graph_2 <- ggplot(group_2, aes(x = `Region/Income/Sex`, y = Suicide_Rate, color 
   theme_minimal()
 
 print(graph_2)
+
 ```
 
 
@@ -147,43 +148,41 @@ datasummary(
 
 # Model
 
-The goal of our modelling strategy is twofold. Firstly,...
-
-Here we briefly describe the Bayesian analysis model used to investigate... Background details and diagnostics are included in [Appendix -@sec-model-details].
+The goal of the Bayesian model is to incorporate prior knowledge, such as insights from previous studies or analyses, into the selection of the model. In this paper, we use multiple linear regression because this model is commonly applied when predicting a continuous outcome variable based on multiple predictor variables. The normal (Gaussian) distribution is effective when used for modeling scenarios where the residuals of the data are assumed to be independent and normally distributed around the regression line. @tbl-sum_sta captures how suicide rate changes depending on various demographic segments. Given that our response variable, suicide rate is continuous and follows a normal distribution as we have seen from @fig-graph_1 and @fig-graph_2, each region/income group/sex demographic consists of data points clustered around its mean. Thus, the Gaussian family model from the Bayesian framework allows a flexible approach to understanding the relationships between the continuous outcome (age-standardized suicide rates(per 100,000 population)) and predictors (region/income/sex, age categories) with the benefits of integrating prior knowledge and quantifying uncertainty around estimates. 
 
 ## Model set-up
 
-Define $y_i$ as the number of seconds that the plane remained aloft. Then $\beta_i$ is the wing width and $\gamma_i$ is the wing length, both measured in millimeters.  
+The multiple linear regression models utilized in this paper is run on R [@citeR] using the `rstanarm` package of @citerstanarm. We use the default priors from `rstanarm`. The response variable $y_i$ is defined as an individual observation of 'Age-standardized suicide rates (per 100 000 population)' for each combination of the explanatory variables. The intercept $\alpha$ represents the intercept of our linear model. It is the expected value of $y_i$ when all predictors are held at reference level. Each $\beta_j$ is the coefficient associated with each predictor in our model. This would correspond to the 'Region/Income/Sex', 'Age 85+', 'Age 75-84', ... , 'Age 15-24'. $\beta_j$ tells us the change in the expected suicide rate per unit change in the predictor assuming all else is held constant. We have specified that both $\alpha$ and $\beta_j$ will have normal priors with a mean of 0 and a standard deviation of 2.5. With this, the `rstanarm` model will internally adjust the priors based on the scale of the predictors to help with the convergence and effectiveness. The error term $\sigma$ is the standard deviation of the residual errors in our model. By default, the `rstanarm` uses the student-t distribution with 3 degrees of freedom for the standard deviation.
 
-\begin{align} 
-y_i|\mu_i, \sigma &\sim \mbox{Normal}(\mu_i, \sigma) \\
-\mu_i &= \alpha + \beta_i + \gamma_i\\
-\alpha &\sim \mbox{Normal}(0, 2.5) \\
-\beta &\sim \mbox{Normal}(0, 2.5) \\
-\gamma &\sim \mbox{Normal}(0, 2.5) \\
-\sigma &\sim \mbox{Exponential}(1)
+\begin{align}
+y_i \mid \mu_i, \sigma &\sim \text{Normal}(\mu_i, \sigma^2) \\
+\mu_i &= \alpha + \beta_1 x_{i1} + \beta_2 x_{i2} + \ldots + \beta_p x_{ip} \\
+\alpha &\sim \text{Normal}(0, 2.5) \\
+\beta_j &\sim \text{Normal}(0, 2.5) \quad \text{for } j = 1, 2, \ldots, p \\
+\sigma &\sim \text{Exponential}(1)
 \end{align}
-
-We run the model in R [@citeR] using the `rstanarm` package of @rstanarm. We use the default priors from `rstanarm`.
 
 
 ### Model justification
 
-We expect a positive relationship between the size of the wings and time spent aloft. In particular...
-
-We can use maths by including latex between dollar signs, for instance $\theta$.
-
+Based on our inference from @sec-data, we expect a stronger positive coefficient in male, and the relatively lower income groups. Because there is a higher suicide rate among males and lower income and lower-middle income groups, we can expect that when there is an increase in the suicide rates of these predictors, age-standardized suicide rate is likely to increase as well. Female and the higher income countries have lower suicide rates than the global average in which helps us conclude that an increase in suicide rates of these predictors isn't likely to increase the global average rate leading us to expect a negative coefficient. The results of the model will let us verify whether our expectations are true or false. 
 
 # Results
 
-Our results are summarized in @tbl-modelsum.
+## Overview of model results
+
+Our results are summarized in @tbl-modelsum. We are primarily interested how global age standardized suicide rate depends on each of its predictors. The multiple linear model provides us with the estimates for the intercept and coefficients for the predictors which are male, female, global, lower income, lower-middle, upper-middle, high income, Asia, Europe, North America, South America, Africa, Oceania, age 85+, age 75-84, age 65-74, age 55-64, age 45-54, age 35-44, age 25-34, age 15-24. The intercept represents the estimate of age-standardized suicide rate when the predictors are zero. The coefficients represent the additional suicide rates per 100,000 population associated with each predictor. The model results will display the estimates - posterior means or medians for each coefficient including the intercept, uncertainty measures - credible intervals. The output values of each predictor is the regression coefficient, meaning how much the outcome is expected to increase or decrease with a one unit increase in the suicide rate of that predictor, holding all else constant. The value in the brackets represent the Median Absolute Deviation of the posterior distributions of the coefficients. It conveys the dispersion around the median of each coefficient's posterior distribution, exhibiting how spread the distributions are. Num.Obs represents the number of observations made in the model. R2 is the R-squared value which is the proportion of variance in the dependent variable that can be explained by the independent variable. The R2 adj is the adjusted R squared which accounts for the number of predictors used. Log.lik is the log-likelihood which gives us an idea of the likelihood of the data, higher is better, but this is typically used for comparison between models. ELPD and ELPD s.e. explains the log predictive density and its standard error. The ELPD measures the sum of the log predictive densities for each observation, used for model comparison. LOOIC is an acronym for leave-one-out information criterion in which a lower value indicates a model with better out-of-sample predictive performance. WAIC stands for Watanabe-Akaike information criterion which is another measure of good fit; lower values are better fit. RMSE is the room mean squared error measuring the model's predictive performance where the lower values mean more accurate predicts. 
+
+## Multiple linear regression results {#sec-results}
+
+@tbl-modelsum is a table of the results from our model. The intercept is the baseline value which in our case is 3.07. Asia shows a negative coefficient of -1.45, suggesting lower values compared to the baseline, with a large standard error of 12.58. This can be interpreted as the predictor increases, the outcome tends to increase. Conversely, a negative coefficient indicates a decrease. Europe has a negligible negative effect of -0.11 on the outcome with a large standard error of 11.24. Female has a more substantial negative impact of -2.07 and the standard error of 16.91 defines considerable variability in the estimate. Global, high income, and lower income groups show minimal negative coefficients suggesting slight decreases from the baseline. Lower middle income presents almost a neutral effect of 0.01 which is surprising. Male shows a positive relation of 0.91 compared to the baseline. North American and Oceania have more notable negative and positive coefficients respectively in which we can observe significant regional variations. In general, age category shows an increasing trend in coefficients as age decreases. Age groups of 55~ has a very small coefficient, stipulating minor increases compared to the baseline, all with small standard errors. The younger age groups from 15-54 suggesting that younger ages are associated with increasing values of the age standardized suicide rate. With the model having a R-squared value of 0.791 is a good level of explanatory power supporting the accuracy of the results. The adjusted R-squared value is at 0.596, which is lower than the R-squared value which may be because the number of observations is only 13 not the whole dataset before getting the averages. The RMSE is at 0.64 telling us the average magnitude of the model's prediction errors and the value indicates better predictive accuracy. Thus, by ignoring values like LOOIC and WAIC as we don't have another model to compare it to and analyzing other results, we can conclude that the model is performing well on the dataset we have cleaned. Further evaluation of the model results will be done in @sec-model_details. 
 
 
 ```{r}
 #| echo: false
 #| eval: true
 #| label: tbl-modelsum
-#| tbl-cap: "Explanatory models of flight time based on wing width and wing length"
+#| tbl-cap: "Multiiple linear model summary"
 #| warning: false
 
 modelsummary(
@@ -199,32 +198,50 @@ modelsummary(
 
 ```
 
-```{r}
-#| echo: false
-#| eval: true
-#| label: tbl-creintv
-#| tbl-cap: "Credibility intervals for the independent variables of age-standardized suicide rates"
-#| warning: false
-
-modelplot(suicide_normal_model, conf_level = 0.95) +
-  labs(x = "95 per cent credibility interval")
-
-```
 
 
 # Discussion {#sec-discussion}
 
-## First discussion point {#sec-first-point}
+## Insights into discrepancies in sex
 
-If my paper were 10 pages, then should be be at least 2.5 pages. The discussion is a chance to show off what you know and what you learnt from all this. 
+In the previous sections we have noticed unusual trends; the discrepancy in sex. @tbl-sumsta explains that there is almost 12 people more who suicide in the male population per 100,000 population. Some of the explanations to the high rates of suicide in male population is from unwillingness to engage in health help-seeking, lack of gender-sensitive mental health services, impulsivity, alcohol and drug use, and use of lethal means. However, it is known that female tend to have higher rates of depression diagnoses and more suicide attempts than male does. The gender paradox in suicide explains such abnormal trends. While females have suicide thoughts more often, males die by suicide more frequently. This is because the methods females use are less immediately lethal. Male tend to use more violent methods such as hanging, carbon monoxide poisoning, or firearm use while females tend to rely on drug overdose and hanging. This makes it more likely for males to die from suicidal attempts compared to females. Though, this may not be the only reason for such discrepancies. Other explanations may include the pressure of gender roles. Traditional male gender roles highlight attributes like strength, independence, willingness to take risks, and financial success and the pressure of society may halt males from seeking help and support. For example, in the traditional male gender role, men are the ones who earn and maintain the money of a family. When men become vulnerable to job loss or financial difficulties, the significant stress can contribute to suicidal thoughts. Moreover, men are more likely to abuse alcohol and drug as a coping mechanism for mental health issues. This may be the factors that lead to the abnormal trends we see from our analysis. Thus, it important for governments to note that different approaches must be used to prevent suicide due to this contrasting data. 
 
-## Second discussion point
 
-## Third discussion point
+## Looking into discrepancies among income groups 
+
+From the summary and analysis of the @tbl-sumsta we have seen that South America, Oceania, and Africa has a majority of countries in low and lower-middle income groups. This explains a correlation between income groups and regions as the relatively lower income countries have higher suicide rates leading to trends in the region predictors. Some of the main reasons to this discrepancy is economic stability and unemployment, access to healthcare, means of suicide, preventative policies. Higher income countries typically have more stable economies and lower levels of poverty which may affect mental health positively or at least not negatively. Conversely, in lower income economies, with high unemployment rates and financial instability can increase stress levels and depressive symptoms leading to higher suicide rates. In general, higher income countries have better healthcare infrastructure and mental health services. This can lead to more effective identification and treatment of depression or any mental health disorders leading to suicidal behavior. The availability and commodity of means of suicide can vary by income level and region. For example, in South East Asia where agriculture is prominent, it may be easier to find pesticides compared to wealthier countries. While, in higher income countries, strict gun laws and regulations can lower the risk of suicide, decreasing suicide rate as a result. Income gaps and regional differences may increase the risk of suicide as it these types of means may be more accessible to the public due to the lack of government regulation. Not only this, higher income countries may have more resources to create public advertisements. This includes public education, suicide hotlines, and any other support system like counseling. These resources may not be prevalent in lower income countries as it requires human resources, money, and time for all this to be achieved. Thus, these reasons may explain the reason why we saw discrepancies among income groups and regions from @tbl-modelsum.
+
+## Further analysis on unemployment and suicide rates {#sec-disc3}
+
+To look deeper into the correlation between unemployment and suicide rates we have created @fig-graph_3 using data from the IMF(@imf2021data). The red points of the graph shows the unemployment rate and the bar chart displays suicide rates for each country. For simplicity, we have removed the countries that are not common in both datasets. From the previous sections the data discussed the relationship between unemployment and suicidal behavior from the income group discrepancies. By observing the graph, it is difficult to notice any correlation as there is no obvious global trends. However, there still seems to be a small correlation as some data points exhibits that a small size of the countries do have a weak correlation between suicide rates and unemployment. For example, in the graph, countries like Argentina, Azerbaijan, Belize, Chile, China, and so forth show very small differences between suicide rates and unemployment and show correlations. This implies that there must be at least a very small correlation between unemployment and suicide rates but looking at the global data, though these trends may be negligible on a global level, as there is a plethora of factors that account for suicide rates. Despite @fig-graph_3 does not display significant results like we expected, there is importance in looking into such data. However, for individual countries to analyze such correlations among causes of suicide as on a smaller scale, for specific countries, the instability of economy may be a leading cause of suicide. Thus, when governments build policies for suicide prevention they may look into the data of diverse factors that affect suicide rates and utilize elimination methods to find out which factors weigh more in accounting for suicide rates. 
+
+```{r}
+#| label: fig-graph_3
+#| fig-cap: Unemployment and suicide rates
+#| echo: false
+#| warning: false
+#| message: false
+
+# Plot for Group 3
+graph_3 <- ggplot(data = unemply_both, aes(x = `Country`)) +
+  geom_bar(aes(y = `Age-standardized suicide rates (per 100 000 population)`), stat = "identity", position = position_dodge(width = 0.5)) +
+  geom_point(aes(y = `Unemployment rate (percent)`), color = "red", position = position_dodge(width = 0.2)) +
+  ggtitle("Unemployment Rate and Suicide Rates") +
+  xlab("Region/Income Group/Sex") +
+  ylab("Suicide Rates / Unemployment Rate") +
+  theme_light() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1, size = 6))
+
+print(graph_3)
+
+```
 
 ## Weaknesses and next steps
 
-Weaknesses and next steps should also be included.
+There are some weaknesses that occur throughout the paper that are crucial to note. One is that the data we used for modelling only has an observation number of 13. This is because what we are studying requires the data to be a mean depending on the mapping we create. Because the number of observations is small, the model results may not be accurate enough due to the low iterations it has. This can be improved if there is a method to model the tables in such a way that we can maintain the original dataset so that the observations would be the same size as the number of countries in each category instead of 13. Another weakness occurs from the models as well. As we have mentioned in @sec-results, we only have a single multiple linear model for our research which puts us on a disadvantage as we can't compare the posterior predictive checks, LOOIC, WAIC, and more. This stops us from concluding our results with 100% confidence because it may appear to be that there exists a better fit model for the dataset. The lack of usage of a variety of models halts us from getting a deeper and more accurate understanding of the study. Lastly, another weakness may arise form the generalization of the data. This paper looks into the global suicide trends depending on the predictors we have chosen. This is done by downloading suicide rate data by country from the WHO. Because the raw data downloaded despite the accuracy is still an estimate of suicide rates per 100,000 population, and the averages calculated for each predictor is an average of an estimate. This can lead to some minor calculation errors leading to potentially different results. In addition, the values we find for each predictor may not be the best representation of the data from predictors as there may be some countries missing from the dataset which should have been calculated. 
+For future studies, it would be suggested to use a more variety of models such as the multilevel modelling to increase the accuracy of the models by cross validation or comparing the results from other models as well. Further insight can be made like we did for @sec-disc3. For example, one can research the correlation between data like social support systems, life satisfaction, social media usage and more. Studying deeper into such correlations will let us notice which factors influences suicidal behavior and suicide rates. Nowadays as suicide rates increase and become a significant cause of death globally, it is crucial for governments and policy makers to know what is the leading cause of suicide from each country/region/income group/sex to create different preventative policies to create a healthier society for the citizens.
+
+
 
 \newpage
 
@@ -232,11 +249,10 @@ Weaknesses and next steps should also be included.
 
 # Appendix {-}
 
-
 # Additional data details {#sec-both_table_details}
 ```{r}
 #| label: tbl-both_table
-#| tbl-cap: Suicide rates for different countries for each age group
+#| tbl-cap: Suicide rates for different countries
 #| echo: false
 #| warning: false
 
@@ -261,23 +277,32 @@ head(clean_both_table, n=183) |>
 
 ```
 
-# Model details {#sec-model-details}
+# Model details {#sec-model_details}
+## Credibility interval
+@fig-credintv is a visualization of the estimated effect of each predictor on the outcome variable. The credibility interval we have created is the range in which we can say the true value of the coefficient lies with 95% credibility. 
 
+
+```{r}
+#| echo: false
+#| eval: true
+#| label: fig-credintv
+#| fig-cap: "Credibility intervals of the predictors"
+#| warning: false
+
+modelplot(suicide_normal_model, conf_level = 0.95) +
+  labs(x = "95 per cent credibility interval")
+
+```
 ## Posterior predictive check
-
-In we implement a posterior predictive check. This shows...
-
-. 
+In @fig-ppcheck we implement a posterior predictive check. This show the comparison between the simulated data to the actual observed data to assess whether the model is adequate. This shows the comparison for the poisson model and we can assess how well each model fits the observed data. Based on the check we can conclude that the multiple linear model fits the observed data as the trace of the Y plot follows the trends of Yrep. 
 
 ```{r}
 #| eval: true
 #| echo: false
 #| message: false
 #| warning: false
-#| label: fig-ppcheckandposteriorvsprior
-#| layout-ncol: 2
+#| label: fig-ppcheck
 #| fig-cap: "Examining how the model fits, and is affected by, the data"
-#| fig-subcap: ["Posterior prediction check", "Comparing the posterior with the prior"]
 
 pp_check(suicide_normal_model) +
   theme_classic() +
@@ -290,7 +315,4 @@ pp_check(suicide_normal_model) +
 
 \newpage
 
-
 # References
-
-

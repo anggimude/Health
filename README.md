@@ -9,7 +9,7 @@ This repo provides a correlation between global suicide rates and its correlatio
 
 The repo is structured as:
 
--   `data/raw_data` contains the raw data as obtained from X.
+-   `data/raw_data` contains the raw data as obtained from the WHO.
 -   `data/analysis_data` contains the cleaned dataset that was constructed.
 -   `model` contains fitted models. 
 -   `other` contains relevant literature and sketches.
